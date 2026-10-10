@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Links</title>
+    <script>
+    function opengame(title, url, ico) {
+      const win = window.open("", "_blank");
+
+      if (!win) {
+        alert("Popup blocked. Allow popups for this page and try again.");
+        return;
+      }
+
+      win.document.title = title;
+
+      win.document.documentElement.style.height = "100%";
+      win.document.body.style.margin = "0";
+      win.document.body.style.height = "100vh";
+      win.document.body.style.overflow = "hidden";
+
+      const iframe = win.document.createElement("iframe");
+      const favicon = document.createElement('link');
+
+      iframe.src = url;
+      iframe.style.display = "block";
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.style.border = "none";
+      favicon.rel = 'icon';
+      favicon.type = 'image/x-icon';
+      favicon.href = ico;
+
+      win.document.body.appendChild(iframe);
+      win.document.head.appendChild(favicon);
+    }
+    </script>  
+</head>
+<body>
+    <button onclick="opengame('PBS LearningMedia | Teaching Resources For Students and Teachers', `https://streamex.hn`, 'https://wtvi.pbslearningmedia.org/favicon.ico')">Under Renovation</button>
+    <button onclick="opengame('Dashboard', `https://mazean.stratusflyer.com`, 'https://cms.instructure.com/favicon.ico')">Mazean</button>
+    <button onclick="opengame('Integrated Science 8th | Grades', `https://keen-rolypoly-cffd64.netlify.app`, 'https://600.ncsis/favicon.ico')">Minecraft Astra 1.8</button>
+    <button onclick="opengame('PBS LearningMedia | Teaching Resources For Students and Teachers', `https://ducky443747.github.io/games/DriveMad/`, 'https://wtvi.pbslearningmedia.org/favicon.ico')">Drive Mad</button>
+    <button onclick="opengame('PBS LearningMedia | Teaching Resources For Students and Teachers', `https://retrobowl2.me/`, 'https://wtvi.pbslearningmedia.org/favicon.ico')">Retro Bowl</button>
+</body>
+</html>

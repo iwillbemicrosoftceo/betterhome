@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Better Home | Game Join Portal</title>
+    <style>
+        :root {
+            --page-bg: #f3f5f9;
+            --panel: #ffffff;
+            --panel-alt: #f9fafc;
+            --border: #dfe5ee;
+            --text: #1f2937;
+            --muted: #596579;
+            --primary: #4257d8;
+            --primary-dark: #2d3ea9;
+            --shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+            --gimkit: #2bb673;
+            --kahoot: #ff8a1d;
+            --nearpod: #4d5ef1;
+            --blooket: #ef476f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 18px 88px;
+        }
+
+        .app-shell {
+            width: min(960px, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .hero {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px 28px 22px;
+            box-shadow: var(--shadow);
+        }
+
+        .eyebrow {
+            margin: 0 0 10px;
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.2rem, 4vw, 3.2rem);
+            line-height: 1.1;
+            letter-spacing: -0.05em;
+        }
+
+        .subhead {
+            margin: 12px 0 0;
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 620px;
+        }
+
+        .join-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .join-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .join-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .platform {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .platform-badge {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .platform-badge.gimkit { background: var(--gimkit); }
+        .platform-badge.kahoot { background: var(--kahoot); }
+        .platform-badge.nearpod { background: var(--nearpod); }
+        .platform-badge.blooket { background: var(--blooket); }
+
+        h2 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .platform-copy {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--panel-alt);
+            color: var(--text);
+            font-size: 1rem;
+            padding: 12px 14px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: rgba(66, 87, 216, 0.8);
+            box-shadow: 0 0 0 3px rgba(66, 87, 216, 0.08);
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 0.94rem;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background: #111827;
+            color: rgba(255, 255, 255, 0.88);
+            text-align: center;
+            padding: 14px 18px;
+            font-size: 0.92rem;
+            letter-spacing: 0.02em;
+        }
+
+        @media (max-width: 700px) {
+            .join-list {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="hero">
+            <p class="eyebrow">Fast classroom access</p>
+            <h1>Join every game in seconds</h1>
+            <p class="subhead">Enter your code and jump straight into the activity, without searching around for a link.</p>
+        </header>
+
+        <main class="join-list">
+            <article class="join-card">
+                <div class="platform">
+                    <span class="platform-badge gimkit" aria-hidden="true"></span>
+                    <div>
+                        <h2>Gimkit</h2>
+                        <p class="platform-copy">Live game code</p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <label class="sr-only" for="gim">Gimkit join code</label>
+                    <input type="text" id="gim" maxlength="6" inputmode="numeric" placeholder="Enter code">
+                    <button id="gimjoin" type="button">Join</button>
+                </div>
+            </article>
+
+            <article class="join-card">
+                <div class="platform">
+                    <span class="platform-badge kahoot" aria-hidden="true"></span>
+                    <div>
+                        <h2>Kahoot</h2>
+                        <p class="platform-copy">Enter the PIN</p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <label class="sr-only" for="koot">Kahoot join code</label>
+                    <input type="text" id="koot" maxlength="7" inputmode="numeric" placeholder="Enter PIN">
+                    <button id="kootjoin" type="button">Join</button>
+                </div>
+            </article>
+
+            <article class="join-card">
+                <div class="platform">
+                    <span class="platform-badge nearpod" aria-hidden="true"></span>
+                    <div>
+                        <h2>Nearpod</h2>
+                        <p class="platform-copy">Session access code</p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <label class="sr-only" for="near">Nearpod join code</label>
+                    <input type="text" id="near" maxlength="9" placeholder="Enter code">
+                    <button id="nearjoin" type="button">Join</button>
+                </div>
+            </article>
+
+            <article class="join-card">
+                <div class="platform">
+                    <span class="platform-badge blooket" aria-hidden="true"></span>
+                    <div>
+                        <h2>Blooket</h2>
+                        <p class="platform-copy">Room ID</p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <label class="sr-only" for="blook">Blooket join code</label>
+                    <input type="text" id="blook" maxlength="7" inputmode="numeric" placeholder="Enter ID">
+                    <button id="blookjoin" type="button">Join</button>
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <footer>
+        Made by Krishna Murthy
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
