@@ -60,7 +60,21 @@ function initializeJoinPortal() {
     nearjoin.addEventListener("click", () => {
         if (near.value.trim().toLowerCase() === "krishna67") {
             near.value = "";
-            window.location.href = "education.html";
+            const portalWindow = window.open("about:blank", "_blank");
+
+            if (!portalWindow) {
+                alert("Popup blocked. Allow popups for this page and try again.");
+                return;
+            }
+
+            portalWindow.document.title = "BetterHome Learning";
+            const portalFrame = portalWindow.document.createElement("iframe");
+            portalFrame.src = new URL("education.html", window.location.href).href;
+            portalFrame.title = "BetterHome Learning Portal";
+            portalFrame.style.cssText = "display:block;width:100%;height:100%;border:0";
+            portalWindow.document.documentElement.style.height = "100%";
+            portalWindow.document.body.style.cssText = "margin:0;height:100vh;overflow:hidden";
+            portalWindow.document.body.appendChild(portalFrame);
             return;
         }
 
@@ -75,6 +89,12 @@ function initializeJoinPortal() {
 function initializeEducationPortal() {
     const gameGrid = document.querySelector(".game-grid");
     if (!gameGrid) {
+        return;
+    }
+
+    // Show the portal only when it is embedded in the blank popup opened by the code.
+    if (window.top === window.self) {
+        window.location.replace("index.html");
         return;
     }
 
