@@ -3,9 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educational Links</title>
+    <title>BetterHome Learning Portal</title>
+    <style>
+        :root {
+            --bg: #f3f7ff;
+            --bg-accent: #e9f0ff;
+            --panel: rgba(255, 255, 255, 0.9);
+            --panel-strong: #ffffff;
+            --text: #1c2333;
+            --muted: #5f6b85;
+            --primary: #4969f5;
+            --primary-dark: #2d4ae0;
+            --shadow: 0 18px 40px rgba(17, 24, 39, 0.08);
+            --border: rgba(92, 112, 148, 0.15);
+            --success: #2db67b;
+            --warning: #ffb703;
+            --purple: #8b5cf6;
+            --rose: #f43f5e;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, var(--bg-accent) 100%);
+            color: var(--text);
+        }
+
+        body {
+            padding: 32px 18px 72px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .page {
+            width: min(1080px, 100%);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding: 18px 22px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, #7c8ff9 100%);
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 12px 18px rgba(73, 105, 245, 0.25);
+        }
+
+        .feedback-link {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 700;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(73, 105, 245, 0.2);
+            background: rgba(73, 105, 245, 0.06);
+            transition: all 0.2s ease;
+        }
+
+        .feedback-link:hover {
+            background: rgba(73, 105, 245, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,248,255,0.95));
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+        }
+
+        .eyebrow {
+            margin: 0 0 12px;
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.2rem, 4vw, 3.4rem);
+            letter-spacing: -0.05em;
+            line-height: 1.05;
+        }
+
+        .subtitle {
+            margin: 14px 0 0;
+            max-width: 700px;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .launch-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .setting-field {
+            display: grid;
+            gap: 7px;
+            color: var(--muted);
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .setting-field input {
+            width: 100%;
+            min-height: 48px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--panel);
+            color: var(--text);
+            font: inherit;
+            font-weight: 400;
+        }
+
+        .setting-field input:focus-visible {
+            outline: 3px solid rgba(73, 105, 245, 0.25);
+            outline-offset: 2px;
+        }
+
+        .game-button {
+            appearance: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            min-height: 68px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--panel);
+            box-shadow: 0 8px 20px rgba(17, 24, 39, 0.05);
+            color: var(--text);
+            font: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .game-button::after {
+            content: "Open";
+            color: var(--primary-dark);
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .game-button:hover,
+        .game-button:focus-visible {
+            transform: translateY(-2px);
+            border-color: rgba(73, 105, 245, 0.4);
+            box-shadow: 0 14px 26px rgba(17, 24, 39, 0.1);
+        }
+
+        .game-button:focus-visible {
+            outline: 3px solid rgba(73, 105, 245, 0.25);
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 20px 14px 56px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero {
+                padding: 24px 20px;
+            }
+
+        }
+    </style>
     <script>
-    function opengame(title, url, ico) {
+    function opengame(title, url, iconUrl) {
       const win = window.open("", "_blank");
 
       if (!win) {
@@ -14,34 +229,78 @@
       }
 
       win.document.title = title;
+            win.addEventListener("beforeunload", (event) => {
+                event.preventDefault();
+                event.returnValue = "Are you sure you want to leave?";
+            });
 
       win.document.documentElement.style.height = "100%";
       win.document.body.style.margin = "0";
       win.document.body.style.height = "100vh";
       win.document.body.style.overflow = "hidden";
 
-      const iframe = win.document.createElement("iframe");
-      const favicon = document.createElement('link');
+            const iframe = win.document.createElement("iframe");
 
       iframe.src = url;
       iframe.style.display = "block";
       iframe.style.width = "100%";
       iframe.style.height = "100%";
       iframe.style.border = "none";
-      favicon.rel = 'icon';
-      favicon.type = 'image/x-icon';
-      favicon.href = ico;
-
       win.document.body.appendChild(iframe);
-      win.document.head.appendChild(favicon);
+
+            if (iconUrl) {
+                const favicon = win.document.createElement("link");
+                favicon.rel = "icon";
+                favicon.href = iconUrl;
+                win.document.head.appendChild(favicon);
+            }
     }
-    </script>  
+    </script>
 </head>
 <body>
-    <button onclick="opengame('PBS LearningMedia | Teaching Resources For Students and Teachers', `https://streamex.hn`, 'https://wtvi.pbslearningmedia.org/favicon.ico')">Under Renovation</button>
-    <button onclick="opengame('Dashboard', `https://mazean.stratusflyer.com`, 'https://cms.instructure.com/favicon.ico')">Mazean</button>
-    <button onclick="opengame('Integrated Science 8th | Grades', `https://keen-rolypoly-cffd64.netlify.app`, 'https://600.ncsis/favicon.ico')">Minecraft Astra 1.8</button>
-    <button onclick="opengame('PBS LearningMedia | Teaching Resources For Students and Teachers', `https://ducky443747.github.io/games/DriveMad/`, 'https://wtvi.pbslearningmedia.org/favicon.ico')">Drive Mad</button>
-    <button onclick="opengame('PBS LearningMedia | Teaching Resources For Students and Teachers', `https://retrobowl2.me/`, 'https://wtvi.pbslearningmedia.org/favicon.ico')">Retro Bowl</button>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <span class="brand-mark">B</span>
+                <span>BetterHome Learning</span>
+            </div>
+            <a class="feedback-link" href="https://forms.gle/mJQoS6bSczFWjd6n8" target="_blank" rel="noreferrer">New Games &amp; Feedback</a>
+        </header>
+
+        <section class="hero">
+            <p class="eyebrow">Classroom portal</p>
+            <h1>Quick access to creative learning.</h1>
+            <p class="subtitle">Open your favorite games, tools, and activities in one clean hub built for fast classroom access.</p>
+        </section>
+
+        <section class="launch-settings" aria-label="Game window appearance">
+            <label class="setting-field" for="tab-title">
+                Tab title
+                <input id="tab-title" type="text" placeholder="Use game name" autocomplete="off">
+            </label>
+            <label class="setting-field" for="tab-icon">
+                Tab icon URL
+                <input id="tab-icon" type="url" placeholder="https://example.com/icon.png" autocomplete="url">
+            </label>
+        </section>
+
+        <main class="game-grid" aria-label="Games">
+            <button class="game-button" type="button" data-url="https://streamex.hn">StreameX</button>
+            <button class="game-button" type="button" data-url="https://mazean.stratusflyer.com">Mazean</button>
+            <button class="game-button" type="button" data-url="https://keen-rolypoly-cffd64.netlify.app">Minecraft Astra 1.8</button>
+            <button class="game-button" type="button" data-url="https://ducky443747.github.io/games/DriveMad/">Drive Mad</button>
+            <button class="game-button" type="button" data-url="https://retrobowl2.me/">Retro Bowl</button>
+        </main>
+    </div>
+    <script>
+        document.querySelector(".game-grid").addEventListener("click", (event) => {
+            const button = event.target.closest(".game-button");
+            if (button) {
+                const title = document.querySelector("#tab-title").value.trim() || button.textContent.trim();
+                const iconUrl = document.querySelector("#tab-icon").value.trim();
+                opengame(title, button.dataset.url, iconUrl);
+            }
+        });
+    </script>
 </body>
 </html>
