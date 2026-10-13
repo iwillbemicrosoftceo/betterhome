@@ -20,7 +20,7 @@
             </div>
         </header>
 
-        <dialog class="icon-editor" id="admin-login-dialog" aria-labelledby="admin-login-title">
+        <dialog class="icon-editor admin-dialog" id="admin-dialog" aria-labelledby="admin-login-title">
             <form id="admin-login-form" novalidate>
                 <h2 id="admin-login-title">Admin login</h2>
                 <label for="admin-password">Password</label>
@@ -28,9 +28,27 @@
                 <p class="icon-editor-error" id="admin-login-error" role="alert" hidden></p>
                 <div class="icon-editor-actions">
                     <button class="icon-editor-cancel" id="admin-login-cancel" type="button">Cancel</button>
-                    <button class="icon-editor-save" id="admin-login-submit" type="submit">Log in</button>
+                    <button class="icon-editor-save" type="submit">Log in</button>
                 </div>
             </form>
+            <section class="admin-game-manager" id="admin-game-manager" aria-labelledby="admin-game-manager-title" hidden>
+                <h2 id="admin-game-manager-title">Manage games</h2>
+                <form id="admin-add-game-form" novalidate>
+                    <label for="admin-game-name">Game name</label>
+                    <input id="admin-game-name" type="text" autocomplete="off" required>
+                    <label for="admin-game-url">Game URL</label>
+                    <input id="admin-game-url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com" required>
+                    <p class="icon-editor-error" id="admin-game-error" role="alert" hidden></p>
+                    <div class="icon-editor-actions">
+                        <button class="icon-editor-save" type="submit">Add game</button>
+                    </div>
+                </form>
+                <ul class="admin-game-list" id="admin-game-list" aria-label="Games"></ul>
+                <div class="icon-editor-actions">
+                    <button class="icon-editor-cancel" id="admin-logout" type="button">Log out</button>
+                    <button class="icon-editor-cancel" id="admin-done" type="button">Done</button>
+                </div>
+            </section>
         </dialog>
 
         <section class="hero">

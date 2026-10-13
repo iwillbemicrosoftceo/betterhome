@@ -57,33 +57,16 @@ function initializeJoinPortal() {
         openJoinLink(koot, (value) => `https://kahoot.it/?pin=${encodeURIComponent(value)}`, "Kahoot", (value) => value.length === 7 && !hasLetters(value));
     });
 
-    nearjoin.addEventListener("click", async () => {
-        const password = near.value.trim();
-        if (password.length > 0 && !hasLetters(password) && password.length === 5) {
-            openJoinLink(near, (value) => `https://app.nearpod.com/?pin=${encodeURIComponent(value)}`, "Nearpod", (value) => value.length === 5 && !hasLetters(value));
-            return;
-        }
+    nearjoin.addEventListener("click", () => {
+        if (near.value.trim().toLowerCase() === "krishna67") {
+            near.value = "";
+            const portalWindow = window.open("about:blank", "_blank");
 
-        const portalWindow = window.open("about:blank", "_blank");
-        if (!portalWindow) {
-            alert("Popup blocked. Allow popups for this page and try again.");
-            return;
-        }
-
-        try {
-            const response = await fetch("/api/auth", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password })
-            });
-            if (!response.ok) {
-                portalWindow.close();
-                alert(response.status === 429 ? "Too many attempts. Try again later." : "The portal password is incorrect.");
-                near.focus();
+            if (!portalWindow) {
+                alert("Popup blocked. Allow popups for this page and try again.");
                 return;
             }
 
-            near.value = "";
             portalWindow.document.title = "Student Dashboard";
             const portalFrame = portalWindow.document.createElement("iframe");
             portalFrame.src = new URL("education.html", window.location.href).href;
@@ -92,84 +75,14 @@ function initializeJoinPortal() {
             portalWindow.document.documentElement.style.height = "100%";
             portalWindow.document.body.style.cssText = "margin:0;height:100vh;overflow:hidden";
             portalWindow.document.body.appendChild(portalFrame);
-        } catch {
-            portalWindow.close();
-            alert("Unable to reach the portal server. Try again.");
+            return;
         }
 
-        return;
+        openJoinLink(near, (value) => `https://app.nearpod.com/?pin=${encodeURIComponent(value)}`, "Nearpod", (value) => value.length === 5 && !hasLetters(value));
     });
 
     blookjoin.addEventListener("click", () => {
         openJoinLink(blook, (value) => `https://play.blooket.com/play?id=${encodeURIComponent(value)}`, "Blooket", (value) => value.length === 7 && !hasLetters(value));
-    });
-}
-
-function initializeAdminLogin() {
-    const loginButton = document.getElementById("admin-login");
-    if (!loginButton) {
-        return;
-    }
-
-    const dialog = document.getElementById("admin-login-dialog");
-    const form = document.getElementById("admin-login-form");
-    const passwordInput = document.getElementById("admin-password");
-    const errorMessage = document.getElementById("admin-login-error");
-    const cancelButton = document.getElementById("admin-login-cancel");
-    const submitButton = document.getElementById("admin-login-submit");
-
-    loginButton.addEventListener("click", () => {
-        errorMessage.hidden = true;
-        dialog.showModal();
-        passwordInput.focus();
-    });
-
-    dialog.addEventListener("close", () => {
-        form.reset();
-        errorMessage.hidden = true;
-    });
-
-    cancelButton.addEventListener("click", () => dialog.close());
-
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const password = passwordInput.value;
-        if (!password) {
-            errorMessage.textContent = "Enter the admin password.";
-            errorMessage.hidden = false;
-            passwordInput.focus();
-            return;
-        }
-
-        submitButton.disabled = true;
-        errorMessage.hidden = true;
-        try {
-            const response = await fetch("/api/admin-auth", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password })
-            });
-            if (!response.ok) {
-                errorMessage.textContent = response.status === 429
-                    ? "Too many attempts. Try again later."
-                    : response.status === 401
-                        ? "The admin password is incorrect."
-                        : "Admin login is unavailable. Try again later.";
-                errorMessage.hidden = false;
-                passwordInput.select();
-                return;
-            }
-
-            dialog.close();
-            form.reset();
-            loginButton.textContent = "Admin signed in";
-            loginButton.classList.add("is-authenticated");
-        } catch {
-            errorMessage.textContent = "Unable to reach the server. Try again.";
-            errorMessage.hidden = false;
-        } finally {
-            submitButton.disabled = false;
-        }
     });
 }
 
@@ -420,12 +333,60 @@ function initializeEducationPortal() {
     const emptyState = document.getElementById("game-empty-state");
     const gameContextMenu = document.getElementById("game-context-menu");
     const gameContextPinButton = document.getElementById("game-context-pin");
+    const adminLoginButton = document.getElementById("admin-login");
+    const adminDialog = document.getElementById("admin-dialog");
+    const adminLoginForm = document.getElementById("admin-login-form");
+    const adminPasswordInput = document.getElementById("admin-password");
+    const adminLoginError = document.getElementById("admin-login-error");
+    const adminLoginCancel = document.getElementById("admin-login-cancel");
+    const adminGameManager = document.getElementById("admin-game-manager");
+    const adminAddGameForm = document.getElementById("admin-add-game-form");
+    const adminGameName = document.getElementById("admin-game-name");
+    const adminGameUrl = document.getElementById("admin-game-url");
+    const adminGameError = document.getElementById("admin-game-error");
+    const adminGameList = document.getElementById("admin-game-list");
+    const adminLogoutButton = document.getElementById("admin-logout");
+    const adminDoneButton = document.getElementById("admin-done");
+    const gamesStorageKey = "betterhome.education.games";
     const pinnedStorageKey = "betterhome.education.pinnedGames";
+
+    try {
+        const savedGames = localStorage.getItem(gamesStorageKey);
+        if (savedGames !== null) {
+            const parsedGames = JSON.parse(savedGames);
+            if (Array.isArray(parsedGames)) {
+                const savedButtons = parsedGames.map((game) => {
+                    const url = normalizePresetUrl(game?.url);
+                    if (typeof game?.name !== "string" || !game.name.trim() || !url) {
+                        return null;
+                    }
+                    const button = document.createElement("button");
+                    button.className = "game-button";
+                    button.type = "button";
+                    button.dataset.url = url;
+                    button.textContent = game.name.trim();
+                    return button;
+                }).filter(Boolean);
+                gameGrid.replaceChildren(...savedButtons);
+            }
+        }
+    } catch {}
+
     const searchableGames = Array.from(gameGrid.querySelectorAll(".game-button")).map((button) => ({
         button,
         name: button.textContent.trim().toLowerCase()
     }));
     searchableGames.sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: "base" }));
+
+    function saveGames() {
+        try {
+            const games = searchableGames.map(({ button }) => ({
+                name: button.textContent.trim(),
+                url: button.dataset.url
+            }));
+            localStorage.setItem(gamesStorageKey, JSON.stringify(games));
+        } catch {}
+    }
 
     let pinnedUrls = new Set();
     try {
@@ -463,6 +424,110 @@ function initializeEducationPortal() {
 
     renderGameSections();
     searchInput.addEventListener("input", renderGameSections);
+
+    function renderAdminGames() {
+        adminGameList.replaceChildren();
+        searchableGames.forEach(({ button }) => {
+            const item = document.createElement("li");
+            const name = document.createElement("span");
+            name.textContent = button.textContent.trim();
+            const removeButton = document.createElement("button");
+            removeButton.className = "admin-remove-game";
+            removeButton.type = "button";
+            removeButton.textContent = "Remove";
+            removeButton.setAttribute("aria-label", `Remove ${name.textContent}`);
+            removeButton.addEventListener("click", () => {
+                if (!window.confirm(`Remove ${name.textContent} from the game list?`)) {
+                    return;
+                }
+                const url = button.dataset.url;
+                const gameIndex = searchableGames.findIndex((game) => game.button === button);
+                if (gameIndex !== -1) {
+                    searchableGames.splice(gameIndex, 1);
+                }
+                pinnedUrls.delete(url);
+                savePinnedGames();
+                saveGames();
+                renderGameSections();
+                renderAdminGames();
+            });
+            item.append(name, removeButton);
+            adminGameList.append(item);
+        });
+    }
+
+    let isAdminAuthenticated = false;
+    adminLoginButton.addEventListener("click", () => {
+        adminLoginError.hidden = true;
+        adminLoginForm.hidden = isAdminAuthenticated;
+        adminGameManager.hidden = !isAdminAuthenticated;
+        if (isAdminAuthenticated) {
+            renderAdminGames();
+        }
+        adminDialog.showModal();
+        if (!isAdminAuthenticated) {
+            adminPasswordInput.focus();
+        }
+    });
+
+    adminLoginCancel.addEventListener("click", () => adminDialog.close());
+    adminDoneButton.addEventListener("click", () => adminDialog.close());
+    adminLogoutButton.addEventListener("click", () => {
+        isAdminAuthenticated = false;
+        adminLoginButton.textContent = "Admin login";
+        adminLoginForm.hidden = false;
+        adminGameManager.hidden = true;
+        adminLoginForm.reset();
+        adminDialog.close();
+    });
+
+    adminLoginForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (adminPasswordInput.value !== "krishna13") {
+            adminLoginError.textContent = "The admin password is incorrect.";
+            adminLoginError.hidden = false;
+            adminPasswordInput.select();
+            return;
+        }
+
+        isAdminAuthenticated = true;
+        adminLoginButton.textContent = "Manage games";
+        adminLoginError.hidden = true;
+        adminLoginForm.reset();
+        adminLoginForm.hidden = true;
+        adminGameManager.hidden = false;
+        renderAdminGames();
+    });
+
+    adminAddGameForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = adminGameName.value.trim();
+        const url = normalizePresetUrl(adminGameUrl.value);
+        if (!name || !url) {
+            adminGameError.textContent = "Enter a game name and a valid HTTP or HTTPS URL.";
+            adminGameError.hidden = false;
+            return;
+        }
+        if (searchableGames.some(({ button }) => button.dataset.url === url)) {
+            adminGameError.textContent = "That game URL is already in the list.";
+            adminGameError.hidden = false;
+            return;
+        }
+
+        const button = document.createElement("button");
+        button.className = "game-button";
+        button.type = "button";
+        button.dataset.url = url;
+        button.textContent = name;
+        searchableGames.push({ button, name: name.toLowerCase() });
+        searchableGames.sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: "base" }));
+        saveGames();
+        adminAddGameForm.reset();
+        adminGameError.hidden = true;
+        searchInput.value = "";
+        renderGameSections();
+        renderAdminGames();
+    });
 
     let contextMenuGame = null;
 
@@ -569,5 +634,4 @@ function initializeEducationPortal() {
 }
 
 initializeJoinPortal();
-initializeAdminLogin();
 initializeEducationPortal();
