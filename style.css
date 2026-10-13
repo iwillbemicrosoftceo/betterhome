@@ -276,17 +276,6 @@ body.education-page {
     transition: all 0.2s ease;
 }
 
-.education-page .admin-login-button {
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.education-page .admin-login-button:focus-visible {
-    outline: 3px solid rgba(73, 105, 245, 0.25);
-    outline-offset: 2px;
-}
-
 .education-page .utopia-link {
     display: inline-flex;
     align-items: center;
@@ -566,11 +555,6 @@ body.education-page {
     box-shadow: var(--shadow);
 }
 
-.education-page .admin-dialog {
-    max-height: calc(100vh - 32px);
-    overflow-y: auto;
-}
-
 .education-page .icon-editor::backdrop {
     background: rgba(17, 24, 39, 0.42);
 }
@@ -579,64 +563,6 @@ body.education-page {
     display: grid;
     gap: 12px;
     padding: 22px;
-}
-
-.education-page .admin-game-manager {
-    display: grid;
-    gap: 14px;
-    padding: 22px;
-}
-
-.education-page .admin-game-manager[hidden] {
-    display: none;
-}
-
-.education-page .admin-game-manager h2 {
-    margin: 0;
-    font-size: 1.15rem;
-}
-
-.education-page .admin-add-game-form {
-    display: grid;
-    gap: 10px;
-}
-
-.education-page .admin-game-list {
-    display: grid;
-    gap: 6px;
-    max-height: min(38vh, 320px);
-    margin: 0;
-    padding: 0;
-    overflow-y: auto;
-    list-style: none;
-}
-
-.education-page .admin-game-list li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-width: 0;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.education-page .admin-game-list li span {
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
-.education-page .admin-game-list .admin-remove-game {
-    flex: 0 0 auto;
-    min-height: 36px;
-    padding: 6px 10px;
-    border: 1px solid rgba(180, 35, 24, 0.25);
-    border-radius: 8px;
-    background: rgba(180, 35, 24, 0.06);
-    color: #b42318;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
 }
 
 .education-page .icon-editor h2 {
