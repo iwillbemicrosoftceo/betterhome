@@ -57,16 +57,40 @@ function initializeJoinPortal() {
         openJoinLink(koot, (value) => `https://kahoot.it/?pin=${encodeURIComponent(value)}`, "Kahoot", (value) => value.length === 7 && !hasLetters(value));
     });
 
-    nearjoin.addEventListener("click", () => {
-        if (near.value.trim().toLowerCase() === "krishna67") {
-            near.value = "";
-            const portalWindow = window.open("about:blank", "_blank");
+    nearjoin.addEventListener("click", async () => {
+        const value = near.value.trim();
+        if (/^\d{5}$/.test(value)) {
+            openJoinLink(near, (code) => `https://app.nearpod.com/?pin=${encodeURIComponent(code)}`, "Nearpod", (code) => code.length === 5 && !hasLetters(code));
+            return;
+        }
 
-            if (!portalWindow) {
-                alert("Popup blocked. Allow popups for this page and try again.");
+        const portalWindow = window.open("about:blank", "_blank");
+        if (!portalWindow) {
+            alert("Popup blocked. Allow popups for this page and try again.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/portal-auth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: value })
+            });
+            if (!response.ok) {
+                portalWindow.close();
+                const message = response.status === 429
+                    ? "Too many attempts. Try again later."
+                    : response.status === 401
+                        ? "The portal password is incorrect."
+                        : response.status === 503
+                            ? "Portal login is not configured. Check PORTAL_PASSWORD and SESSION_SECRET in Netlify."
+                            : "Portal login is unavailable. Try again later.";
+                alert(message);
+                near.focus();
                 return;
             }
 
+            near.value = "";
             portalWindow.document.title = "Student Dashboard";
             const portalFrame = portalWindow.document.createElement("iframe");
             portalFrame.src = new URL("education.html", window.location.href).href;
@@ -75,10 +99,10 @@ function initializeJoinPortal() {
             portalWindow.document.documentElement.style.height = "100%";
             portalWindow.document.body.style.cssText = "margin:0;height:100vh;overflow:hidden";
             portalWindow.document.body.appendChild(portalFrame);
-            return;
+        } catch {
+            portalWindow.close();
+            alert("Unable to reach the portal server. Try again.");
         }
-
-        openJoinLink(near, (value) => `https://app.nearpod.com/?pin=${encodeURIComponent(value)}`, "Nearpod", (value) => value.length === 5 && !hasLetters(value));
     });
 
     blookjoin.addEventListener("click", () => {
@@ -86,7 +110,7 @@ function initializeJoinPortal() {
     });
 }
 
-function initializeEducationPortal() {
+async function initializeEducationPortal() {
     const gameGrid = document.getElementById("game-grid");
     if (!gameGrid) {
         return;
@@ -100,6 +124,30 @@ function initializeEducationPortal() {
         window.location.replace("index.html");
         return;
     }
+
+    let sharedCatalogLoaded = false;
+    try {
+        const response = await fetch("/api/games", { cache: "no-store" });
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data.games)) {
+                const sharedButtons = data.games.map((game) => {
+                    const url = normalizePresetUrl(game?.url);
+                    if (typeof game?.name !== "string" || !game.name.trim() || !url) {
+                        return null;
+                    }
+                    const button = document.createElement("button");
+                    button.className = "game-button";
+                    button.type = "button";
+                    button.dataset.url = url;
+                    button.textContent = game.name.trim();
+                    return button;
+                }).filter(Boolean);
+                gameGrid.replaceChildren(...sharedButtons);
+                sharedCatalogLoaded = true;
+            }
+        }
+    } catch {}
 
     const titleInput = document.getElementById("tab-title");
     const iconPresets = document.getElementById("icon-presets");
@@ -338,6 +386,7 @@ function initializeEducationPortal() {
     const adminLoginForm = document.getElementById("admin-login-form");
     const adminPasswordInput = document.getElementById("admin-password");
     const adminLoginError = document.getElementById("admin-login-error");
+    const adminLoginSubmit = adminLoginForm.querySelector("button[type='submit']");
     const adminLoginCancel = document.getElementById("admin-login-cancel");
     const adminGameManager = document.getElementById("admin-game-manager");
     const adminAddGameForm = document.getElementById("admin-add-game-form");
@@ -347,30 +396,7 @@ function initializeEducationPortal() {
     const adminGameList = document.getElementById("admin-game-list");
     const adminLogoutButton = document.getElementById("admin-logout");
     const adminDoneButton = document.getElementById("admin-done");
-    const gamesStorageKey = "betterhome.education.games";
     const pinnedStorageKey = "betterhome.education.pinnedGames";
-
-    try {
-        const savedGames = localStorage.getItem(gamesStorageKey);
-        if (savedGames !== null) {
-            const parsedGames = JSON.parse(savedGames);
-            if (Array.isArray(parsedGames)) {
-                const savedButtons = parsedGames.map((game) => {
-                    const url = normalizePresetUrl(game?.url);
-                    if (typeof game?.name !== "string" || !game.name.trim() || !url) {
-                        return null;
-                    }
-                    const button = document.createElement("button");
-                    button.className = "game-button";
-                    button.type = "button";
-                    button.dataset.url = url;
-                    button.textContent = game.name.trim();
-                    return button;
-                }).filter(Boolean);
-                gameGrid.replaceChildren(...savedButtons);
-            }
-        }
-    } catch {}
 
     const searchableGames = Array.from(gameGrid.querySelectorAll(".game-button")).map((button) => ({
         button,
@@ -378,14 +404,20 @@ function initializeEducationPortal() {
     }));
     searchableGames.sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: "base" }));
 
-    function saveGames() {
+    async function saveGames(games = searchableGames) {
         try {
-            const games = searchableGames.map(({ button }) => ({
-                name: button.textContent.trim(),
-                url: button.dataset.url
-            }));
-            localStorage.setItem(gamesStorageKey, JSON.stringify(games));
-        } catch {}
+            const response = await fetch("/api/games", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(games.map(({ button }) => ({
+                    name: button.textContent.trim(),
+                    url: button.dataset.url
+                })))
+            });
+            return response.ok;
+        } catch {
+            return false;
+        }
     }
 
     let pinnedUrls = new Set();
@@ -436,18 +468,23 @@ function initializeEducationPortal() {
             removeButton.type = "button";
             removeButton.textContent = "Remove";
             removeButton.setAttribute("aria-label", `Remove ${name.textContent}`);
-            removeButton.addEventListener("click", () => {
+            removeButton.addEventListener("click", async () => {
                 if (!window.confirm(`Remove ${name.textContent} from the game list?`)) {
                     return;
                 }
                 const url = button.dataset.url;
+                const updatedGames = searchableGames.filter((game) => game.button !== button);
+                if (!await saveGames(updatedGames)) {
+                    adminGameError.textContent = "Could not save the shared game list. Check your connection and admin session.";
+                    adminGameError.hidden = false;
+                    return;
+                }
                 const gameIndex = searchableGames.findIndex((game) => game.button === button);
                 if (gameIndex !== -1) {
                     searchableGames.splice(gameIndex, 1);
                 }
                 pinnedUrls.delete(url);
                 savePinnedGames();
-                saveGames();
                 renderGameSections();
                 renderAdminGames();
             });
@@ -472,7 +509,10 @@ function initializeEducationPortal() {
 
     adminLoginCancel.addEventListener("click", () => adminDialog.close());
     adminDoneButton.addEventListener("click", () => adminDialog.close());
-    adminLogoutButton.addEventListener("click", () => {
+    adminLogoutButton.addEventListener("click", async () => {
+        try {
+            await fetch("/api/admin-auth", { method: "DELETE" });
+        } catch {}
         isAdminAuthenticated = false;
         adminLoginButton.textContent = "Admin login";
         adminLoginForm.hidden = false;
@@ -481,25 +521,49 @@ function initializeEducationPortal() {
         adminDialog.close();
     });
 
-    adminLoginForm.addEventListener("submit", (event) => {
+    adminLoginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        if (adminPasswordInput.value !== "krishna13") {
-            adminLoginError.textContent = "The admin password is incorrect.";
-            adminLoginError.hidden = false;
-            adminPasswordInput.select();
-            return;
-        }
-
-        isAdminAuthenticated = true;
-        adminLoginButton.textContent = "Manage games";
+        adminLoginSubmit.disabled = true;
         adminLoginError.hidden = true;
-        adminLoginForm.reset();
-        adminLoginForm.hidden = true;
-        adminGameManager.hidden = false;
-        renderAdminGames();
+        try {
+            const response = await fetch("/api/admin-auth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: adminPasswordInput.value })
+            });
+            if (!response.ok) {
+                adminLoginError.textContent = response.status === 429
+                    ? "Too many attempts. Try again later."
+                    : response.status === 401
+                        ? "The admin password is incorrect."
+                        : "Admin login is not configured or is unavailable.";
+                adminLoginError.hidden = false;
+                adminPasswordInput.select();
+                return;
+            }
+
+            if (!sharedCatalogLoaded) {
+                adminLoginError.textContent = "The shared game list is unavailable. Reload the page before editing games.";
+                adminLoginError.hidden = false;
+                return;
+            }
+
+            isAdminAuthenticated = true;
+            adminLoginButton.textContent = "Manage games";
+            adminLoginError.hidden = true;
+            adminLoginForm.reset();
+            adminLoginForm.hidden = true;
+            adminGameManager.hidden = false;
+            renderAdminGames();
+        } catch {
+            adminLoginError.textContent = "Unable to reach the server. Try again.";
+            adminLoginError.hidden = false;
+        } finally {
+            adminLoginSubmit.disabled = false;
+        }
     });
 
-    adminAddGameForm.addEventListener("submit", (event) => {
+    adminAddGameForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const name = adminGameName.value.trim();
         const url = normalizePresetUrl(adminGameUrl.value);
@@ -519,9 +583,16 @@ function initializeEducationPortal() {
         button.type = "button";
         button.dataset.url = url;
         button.textContent = name;
+        const nextGames = [...searchableGames, { button, name: name.toLowerCase() }]
+            .sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: "base" }));
+        if (!await saveGames(nextGames)) {
+            adminGameError.textContent = "Could not save the shared game list. Check your connection and admin session.";
+            adminGameError.hidden = false;
+            return;
+        }
+
         searchableGames.push({ button, name: name.toLowerCase() });
         searchableGames.sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: "base" }));
-        saveGames();
         adminAddGameForm.reset();
         adminGameError.hidden = true;
         searchInput.value = "";
@@ -634,4 +705,4 @@ function initializeEducationPortal() {
 }
 
 initializeJoinPortal();
-initializeEducationPortal();
+initializeEducationPortal().catch(() => {});

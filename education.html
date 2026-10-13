@@ -35,9 +35,9 @@
                 <h2 id="admin-game-manager-title">Manage games</h2>
                 <form id="admin-add-game-form" novalidate>
                     <label for="admin-game-name">Game name</label>
-                    <input id="admin-game-name" type="text" autocomplete="off" required>
+                    <input id="admin-game-name" type="text" maxlength="80" autocomplete="off" required>
                     <label for="admin-game-url">Game URL</label>
-                    <input id="admin-game-url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com" required>
+                    <input id="admin-game-url" type="url" inputmode="url" maxlength="2048" autocomplete="url" placeholder="https://example.com" required>
                     <p class="icon-editor-error" id="admin-game-error" role="alert" hidden></p>
                     <div class="icon-editor-actions">
                         <button class="icon-editor-save" type="submit">Add game</button>
