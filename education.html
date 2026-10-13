@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterHome Learning Portal</title>
+    <title>Student Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="education-page">
     <div class="page">
         <header class="topbar">
             <div class="brand">
-                <span class="brand-mark">B</span>
-                <span>BetterHome Learning</span>
+                <span class="brand-mark">S</span>
+                <span>Student Dashboard</span>
             </div>
-            <a class="feedback-link" href="https://forms.gle/mJQoS6bSczFWjd6n8" target="_blank" rel="noreferrer">New Games &amp; Feedback</a>
+            <div class="topbar-links">
+                <a class="feedback-link" href="https://forms.gle/mJQoS6bSczFWjd6n8" target="_blank" rel="noreferrer">New Games &amp; Feedback</a>
+                <a class="feedback-link utopia-link" href="https://vivaan.chickenkiller.com/" target="_blank" rel="noopener noreferrer"><img src="https://avatars.githubusercontent.com/u/126352888?s=200&amp;v=4" alt="" aria-hidden="true">Utopia</a>
+            </div>
         </header>
 
         <section class="hero">
@@ -27,20 +30,59 @@
                 Tab title
                 <input id="tab-title" type="text" placeholder="Use game name" autocomplete="off">
             </label>
-            <label class="setting-field" for="tab-icon">
-                Tab icon URL
-                <input id="tab-icon" type="url" placeholder="https://cms.instructure.com/favicon.ico" autocomplete="url">
-            </label>
+            <div class="setting-field icon-setting">
+                <div class="icon-presets" id="icon-presets" role="group" aria-label="Tab icon presets">
+                    <button class="icon-preset-add" id="add-icon-preset" type="button" title="Add favicon preset" aria-label="Add favicon preset">+</button>
+                    <button class="icon-preset-manage" id="toggle-icon-edit" type="button" title="Edit favicon presets" aria-label="Edit favicon presets" aria-pressed="false"><span aria-hidden="true">&#9998;</span></button>
+                </div>
+            </div>
         </section>
 
-        <main class="game-grid" aria-label="Games">
-            <button class="game-button" type="button" data-url="https://streamex.hn">StreameX</button>
-            <button class="game-button" type="button" data-url="https://mazean.stratusflyer.com">Mazean</button>
-            <button class="game-button" type="button" data-url="https://keen-rolypoly-cffd64.netlify.app">Minecraft Astra 1.8</button>
-            <button class="game-button" type="button" data-url="https://ducky443747.github.io/games/DriveMad/">Drive Mad</button>
-            <button class="game-button" type="button" data-url="https://retrobowl2.me/">Retro Bowl</button>
-            <button class="game-button" type="button" data-url="https://vivaan.chickenkiller.com/">Utopia Link</button>
-        </main>
+        <dialog class="icon-editor" id="icon-editor" aria-labelledby="icon-editor-title">
+            <form id="icon-editor-form" novalidate>
+                <h2 id="icon-editor-title">Add favicon preset</h2>
+                <label for="icon-editor-url">Favicon URL</label>
+                <input id="icon-editor-url" type="url" inputmode="url" autocomplete="url" required>
+                <p class="icon-editor-error" id="icon-editor-error" role="alert" hidden></p>
+                <div class="icon-editor-actions">
+                    <button class="icon-editor-cancel" id="icon-editor-cancel" type="button">Cancel</button>
+                    <button class="icon-editor-save" type="submit">Save</button>
+                </div>
+            </form>
+        </dialog>
+
+        <div class="game-tools">
+            <label class="game-search">
+                <input id="game-search" type="search" placeholder="Search games" aria-label="Search games" autocomplete="off">
+            </label>
+            <p class="game-empty-state" id="game-empty-state" role="status" hidden>No games found.</p>
+        </div>
+
+        <section class="game-section pinned-games" id="pinned-games" aria-labelledby="pinned-games-heading" hidden>
+            <h2 id="pinned-games-heading">Pinned Games</h2>
+            <div class="game-grid" id="pinned-game-grid"></div>
+        </section>
+
+        <section class="game-section all-games" id="all-games-section" aria-labelledby="all-games-heading">
+            <h2 id="all-games-heading">All Games</h2>
+            <main class="game-grid" id="game-grid" aria-labelledby="all-games-heading">
+                <button class="game-button" type="button" data-url="https://streamex.hn">StreameX</button>
+                <button class="game-button" type="button" data-url="https://mazean.stratusflyer.com">Mazean</button>
+                <button class="game-button" type="button" data-url="https://keen-rolypoly-cffd64.netlify.app">Minecraft Astra 1.8</button>
+                <button class="game-button" type="button" data-url="https://ducky443747.github.io/games/DriveMad/">Drive Mad</button>
+                <button class="game-button" type="button" data-url="https://retrobowl2.me/">Retro Bowl</button>
+                <button class="game-button" type="button" data-url="https://yinnotayl.github.io/Polytrack">PolyTrack (modded)</button>
+                <button class="game-button" type="button" data-url="https://helpmycator.github.io/coolgamesofstuff/games/bitlife.html">BitLife</button>
+                <button class="game-button" type="button" data-url="https://www.hoodamath.com/games/idlebreakout.html">Idle Breakout</button>
+                <button class="game-button" type="button" data-url="https://www.jopi.com/game/game/iron-snout/">Iron Snout</button>
+                <button class="game-button" type="button" data-url="https://ragdollarchers.github.io/ragdoll-archers.html">Ragdoll Archers</button>
+                <button class="game-button" type="button" data-url="https://duckstreet.net/">Duck Street</button>
+                <button class="game-button" type="button" data-url="https://super-mario-64.bitbucket.io/file/">Super Mario 64</button>            </main>
+        </section>
+
+        <div class="game-context-menu" id="game-context-menu" role="menu" hidden>
+            <button id="game-context-pin" type="button" role="menuitem">Pin game</button>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
