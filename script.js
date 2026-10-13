@@ -67,10 +67,10 @@ function initializeJoinPortal() {
                 return;
             }
 
-            portalWindow.document.title = "BetterHome Learning";
+            portalWindow.document.title = "Student Dashboard";
             const portalFrame = portalWindow.document.createElement("iframe");
             portalFrame.src = new URL("education.html", window.location.href).href;
-            portalFrame.title = "BetterHome Learning Portal";
+            portalFrame.title = "Student Dashboard";
             portalFrame.style.cssText = "display:block;width:100%;height:100%;border:0";
             portalWindow.document.documentElement.style.height = "100%";
             portalWindow.document.body.style.cssText = "margin:0;height:100vh;overflow:hidden";
@@ -87,19 +87,351 @@ function initializeJoinPortal() {
 }
 
 function initializeEducationPortal() {
-    const gameGrid = document.querySelector(".game-grid");
+    const gameGrid = document.getElementById("game-grid");
     if (!gameGrid) {
         return;
     }
 
-    // Show the portal only when it is embedded in the blank popup opened by the code.
+    const pinnedSection = document.getElementById("pinned-games");
+    const pinnedGameGrid = document.getElementById("pinned-game-grid");
+    const allGamesSection = document.getElementById("all-games-section");
+
     if (window.top === window.self) {
         window.location.replace("index.html");
         return;
     }
 
     const titleInput = document.getElementById("tab-title");
-    const iconInput = document.getElementById("tab-icon");
+    const iconPresets = document.getElementById("icon-presets");
+    const addIconPresetButton = document.getElementById("add-icon-preset");
+    const toggleIconEditButton = document.getElementById("toggle-icon-edit");
+    const iconEditor = document.getElementById("icon-editor");
+    const iconEditorForm = document.getElementById("icon-editor-form");
+    const iconEditorTitle = document.getElementById("icon-editor-title");
+    const iconEditorUrl = document.getElementById("icon-editor-url");
+    const iconEditorError = document.getElementById("icon-editor-error");
+    const iconEditorCancel = document.getElementById("icon-editor-cancel");
+    const titleStorageKey = "betterhome.education.tabTitle";
+    const iconStorageKey = "betterhome.education.tabIcon";
+    const presetsStorageKey = "betterhome.education.iconPresets";
+    const defaultPresets = [
+        { url: "https://cms.instructure.com/favicon.ico" },
+        { url: "https://600.ncsis.gov" },
+        { url: "https://i-ready.com/favicon.ico" },
+        { url: "https://google.com/favicon.ico" }
+    ];
+    let selectedIconUrl = "";
+
+    try {
+        titleInput.value = localStorage.getItem(titleStorageKey) || "";
+        selectedIconUrl = localStorage.getItem(iconStorageKey) || "";
+    } catch {}
+
+    function saveAppearanceSettings() {
+        try {
+            localStorage.setItem(titleStorageKey, titleInput.value);
+            localStorage.setItem(iconStorageKey, selectedIconUrl);
+        } catch {}
+    }
+
+    function normalizePresetUrl(value) {
+        if (typeof value !== "string") {
+            return null;
+        }
+        const normalizedUrl = value.trim();
+        try {
+            const parsedUrl = new URL(normalizedUrl);
+            return ["http:", "https:"].includes(parsedUrl.protocol) ? normalizedUrl : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function getPresetPreview(url) {
+        const parsedUrl = new URL(url);
+        if (parsedUrl.hostname === "600.ncsis.gov" && parsedUrl.pathname === "/") {
+            return `${parsedUrl.origin}/favicon.ico`;
+        }
+        return url;
+    }
+
+    let presets = defaultPresets;
+    try {
+        const savedValue = localStorage.getItem(presetsStorageKey);
+        if (savedValue !== null) {
+            const savedPresets = JSON.parse(savedValue);
+            if (Array.isArray(savedPresets)) {
+                if (savedPresets.length === 0) {
+                    presets = [];
+                } else if (typeof savedPresets[0] === "string") {
+                    const legacyUrls = savedPresets.map(normalizePresetUrl).filter(Boolean);
+                    presets = [...defaultPresets, ...legacyUrls.filter((url) => !defaultPresets.some((preset) => preset.url === url)).map((url) => ({ url }))];
+                } else {
+                    presets = savedPresets.map((preset) => normalizePresetUrl(preset?.url)).filter(Boolean).map((url) => ({ url }));
+                }
+            }
+        }
+    } catch {
+        presets = defaultPresets;
+    }
+
+    function updateSelectedPreset() {
+        iconPresets.querySelectorAll(".icon-preset").forEach((button) => {
+            button.setAttribute("aria-pressed", String(button.dataset.iconUrl === selectedIconUrl));
+        });
+    }
+
+    function savePresets() {
+        try {
+            localStorage.setItem(presetsStorageKey, JSON.stringify(presets));
+        } catch {}
+    }
+
+    function renderPresets() {
+        iconPresets.querySelectorAll(".icon-preset-item").forEach((item) => item.remove());
+        presets.forEach((preset, index) => {
+            const item = document.createElement("div");
+            item.className = "icon-preset-item";
+            item.dataset.presetIndex = String(index);
+
+            const selectButton = document.createElement("button");
+            selectButton.className = "icon-preset";
+            selectButton.type = "button";
+            selectButton.dataset.iconUrl = preset.url;
+            selectButton.title = new URL(preset.url).hostname;
+            selectButton.setAttribute("aria-label", `Use ${selectButton.title} favicon`);
+            selectButton.setAttribute("aria-pressed", "false");
+
+            const image = document.createElement("img");
+            image.src = getPresetPreview(preset.url);
+            image.alt = "";
+            image.setAttribute("aria-hidden", "true");
+            selectButton.appendChild(image);
+
+            const actions = document.createElement("div");
+            actions.className = "icon-preset-actions";
+            const editButton = document.createElement("button");
+            editButton.className = "icon-preset-edit";
+            editButton.type = "button";
+            editButton.title = "Edit favicon URL";
+            editButton.setAttribute("aria-label", `Edit ${selectButton.title} favicon URL`);
+            editButton.textContent = "✎";
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "icon-preset-delete";
+            deleteButton.type = "button";
+            deleteButton.title = "Delete favicon preset";
+            deleteButton.setAttribute("aria-label", `Delete ${selectButton.title} favicon preset`);
+            deleteButton.textContent = "×";
+            actions.append(editButton, deleteButton);
+            item.append(selectButton, actions);
+            iconPresets.insertBefore(item, addIconPresetButton);
+        });
+        updateSelectedPreset();
+    }
+
+    function setSelectedIcon(url) {
+        selectedIconUrl = url;
+        saveAppearanceSettings();
+        updateSelectedPreset();
+    }
+
+    function addPreset(url) {
+        presets.push({ url });
+        savePresets();
+        renderPresets();
+        setSelectedIcon(url);
+    }
+
+    let editingPresetIndex = null;
+
+    function openPresetEditor(index = null) {
+        editingPresetIndex = index;
+        iconEditorTitle.textContent = index === null ? "Add favicon preset" : "Edit favicon preset";
+        iconEditorUrl.value = index === null ? "" : presets[index].url;
+        iconEditorError.hidden = true;
+        iconEditorError.textContent = "";
+        iconEditor.showModal();
+        iconEditorUrl.focus();
+    }
+
+    renderPresets();
+    titleInput.addEventListener("input", saveAppearanceSettings);
+
+    iconPresets.addEventListener("click", (event) => {
+        const editButton = event.target.closest(".icon-preset-edit");
+        const deleteButton = event.target.closest(".icon-preset-delete");
+        const item = event.target.closest(".icon-preset-item");
+
+        if (editButton && item) {
+            const index = Number(item.dataset.presetIndex);
+            openPresetEditor(index);
+            return;
+        }
+
+        if (deleteButton && item) {
+            const index = Number(item.dataset.presetIndex);
+            const deletedUrl = presets[index].url;
+            presets.splice(index, 1);
+            if (selectedIconUrl === deletedUrl) {
+                setSelectedIcon("");
+            }
+            savePresets();
+            renderPresets();
+            return;
+        }
+
+        const preset = event.target.closest(".icon-preset");
+        if (preset) {
+            setSelectedIcon(preset.dataset.iconUrl);
+        }
+    });
+
+    addIconPresetButton.addEventListener("click", () => {
+        openPresetEditor();
+    });
+
+    iconEditorCancel.addEventListener("click", () => iconEditor.close());
+
+    iconEditorForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const url = normalizePresetUrl(iconEditorUrl.value);
+        if (!url) {
+            iconEditorError.textContent = "Enter a valid HTTP or HTTPS favicon URL.";
+            iconEditorError.hidden = false;
+            return;
+        }
+
+        if (presets.some((preset, index) => index !== editingPresetIndex && preset.url === url)) {
+            iconEditorError.textContent = "That favicon is already in your presets.";
+            iconEditorError.hidden = false;
+            return;
+        }
+
+        if (editingPresetIndex === null) {
+            addPreset(url);
+        } else {
+            const oldUrl = presets[editingPresetIndex].url;
+            presets[editingPresetIndex] = { url };
+            if (selectedIconUrl === oldUrl) {
+                setSelectedIcon(url);
+            }
+            savePresets();
+            renderPresets();
+        }
+        iconEditor.close();
+    });
+
+    toggleIconEditButton.addEventListener("click", () => {
+        const editing = toggleIconEditButton.getAttribute("aria-pressed") !== "true";
+        toggleIconEditButton.setAttribute("aria-pressed", String(editing));
+        toggleIconEditButton.title = editing ? "Done editing favicon presets" : "Edit favicon presets";
+        toggleIconEditButton.setAttribute("aria-label", toggleIconEditButton.title);
+        iconPresets.classList.toggle("is-editing", editing);
+    });
+
+    const searchInput = document.getElementById("game-search");
+    const emptyState = document.getElementById("game-empty-state");
+    const gameContextMenu = document.getElementById("game-context-menu");
+    const gameContextPinButton = document.getElementById("game-context-pin");
+    const pinnedStorageKey = "betterhome.education.pinnedGames";
+    const searchableGames = Array.from(gameGrid.querySelectorAll(".game-button")).map((button) => ({
+        button,
+        name: button.textContent.trim().toLowerCase()
+    }));
+    searchableGames.sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: "base" }));
+
+    let pinnedUrls = new Set();
+    try {
+        const savedPinnedUrls = JSON.parse(localStorage.getItem(pinnedStorageKey) || "[]");
+        if (Array.isArray(savedPinnedUrls)) {
+            const knownUrls = new Set(searchableGames.map(({ button }) => button.dataset.url));
+            pinnedUrls = new Set(savedPinnedUrls.filter((url) => knownUrls.has(url)));
+        }
+    } catch {}
+
+    function savePinnedGames() {
+        try {
+            localStorage.setItem(pinnedStorageKey, JSON.stringify(Array.from(pinnedUrls)));
+        } catch {}
+    }
+
+    function renderGameSections() {
+        const query = searchInput.value.trim().toLowerCase();
+        const pinnedGames = [];
+        const remainingGames = [];
+        let visibleCount = 0;
+
+        searchableGames.forEach(({ button, name }) => {
+            button.hidden = query !== "" && !name.includes(query);
+            visibleCount += Number(!button.hidden);
+            (pinnedUrls.has(button.dataset.url) ? pinnedGames : remainingGames).push(button);
+        });
+
+        pinnedGameGrid.replaceChildren(...pinnedGames);
+        gameGrid.replaceChildren(...remainingGames);
+        pinnedSection.hidden = !pinnedGames.some((button) => !button.hidden);
+        allGamesSection.hidden = !remainingGames.some((button) => !button.hidden);
+        emptyState.hidden = visibleCount !== 0;
+    }
+
+    renderGameSections();
+    searchInput.addEventListener("input", renderGameSections);
+
+    let contextMenuGame = null;
+
+    function closeGameContextMenu(restoreFocus = false) {
+        gameContextMenu.hidden = true;
+        if (restoreFocus && contextMenuGame) {
+            contextMenuGame.focus();
+        }
+        contextMenuGame = null;
+    }
+
+    document.addEventListener("contextmenu", (event) => {
+        const button = event.target.closest(".game-button");
+        if (!button || !searchableGames.some((game) => game.button === button)) {
+            closeGameContextMenu();
+            return;
+        }
+
+        event.preventDefault();
+        contextMenuGame = button;
+        const isPinned = pinnedUrls.has(button.dataset.url);
+        gameContextPinButton.textContent = isPinned ? "Unpin game" : "Pin game";
+        gameContextMenu.hidden = false;
+        const menuBounds = gameContextMenu.getBoundingClientRect();
+        gameContextMenu.style.left = `${Math.max(8, Math.min(event.clientX, window.innerWidth - menuBounds.width - 8))}px`;
+        gameContextMenu.style.top = `${Math.max(8, Math.min(event.clientY, window.innerHeight - menuBounds.height - 8))}px`;
+        gameContextPinButton.focus();
+    });
+
+    gameContextPinButton.addEventListener("click", () => {
+        if (!contextMenuGame) {
+            return;
+        }
+        const url = contextMenuGame.dataset.url;
+        if (pinnedUrls.has(url)) {
+            pinnedUrls.delete(url);
+        } else {
+            pinnedUrls.add(url);
+        }
+        savePinnedGames();
+        renderGameSections();
+        closeGameContextMenu(true);
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!gameContextMenu.hidden && !gameContextMenu.contains(event.target)) {
+            closeGameContextMenu();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !gameContextMenu.hidden) {
+            event.preventDefault();
+            closeGameContextMenu(true);
+        }
+    });
 
     function openGameWindow(title, url, iconUrl) {
         const gameWindow = window.open("", "_blank");
@@ -110,8 +442,6 @@ function initializeEducationPortal() {
         }
 
         gameWindow.document.title = title;
-
-        // Browsers choose the prompt wording and may require prior interaction.
         gameWindow.addEventListener("beforeunload", (event) => {
             event.preventDefault();
             event.returnValue = "Are you sure you want to leave?";
@@ -138,20 +468,18 @@ function initializeEducationPortal() {
         }
     }
 
-    // The same launch controls are shared by every game button on this page.
-    gameGrid.addEventListener("click", (event) => {
-        const button = event.target.closest(".game-button");
-        if (!button) {
-            return;
-        }
+    [pinnedGameGrid, gameGrid].forEach((grid) => {
+        grid.addEventListener("click", (event) => {
+            const button = event.target.closest(".game-button");
+            if (!button) {
+                return;
+            }
 
-        const title = titleInput.value.trim() || button.textContent.trim();
-        const iconUrl = iconInput.value.trim();
-        openGameWindow(title, button.dataset.url, iconUrl);
+            const title = titleInput.value.trim() || button.textContent.trim();
+            openGameWindow(title, button.dataset.url, selectedIconUrl);
+        });
     });
 }
 
-// Each initializer exits immediately when its page-specific markup is absent.
 initializeJoinPortal();
 initializeEducationPortal();
-

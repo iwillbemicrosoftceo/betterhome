@@ -217,6 +217,13 @@ body.education-page {
     width: min(1080px, 100%);
 }
 
+.education-page footer {
+    margin: 28px auto 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    text-align: center;
+}
+
 .education-page .topbar {
     display: flex;
     justify-content: space-between;
@@ -251,6 +258,13 @@ body.education-page {
     box-shadow: 0 12px 18px rgba(73, 105, 245, 0.25);
 }
 
+.education-page .topbar-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .education-page .feedback-link {
     padding: 10px 16px;
     border: 1px solid rgba(73, 105, 245, 0.2);
@@ -260,6 +274,19 @@ body.education-page {
     font-weight: 700;
     text-decoration: none;
     transition: all 0.2s ease;
+}
+
+.education-page .utopia-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.education-page .utopia-link img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .education-page .feedback-link:hover {
@@ -332,6 +359,271 @@ body.education-page {
 }
 
 .education-page .setting-field input:focus-visible {
+    outline: 3px solid rgba(73, 105, 245, 0.25);
+    outline-offset: 2px;
+}
+
+.education-page .icon-presets {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.education-page .icon-preset-item {
+    position: relative;
+    width: 42px;
+    height: 42px;
+}
+
+.education-page .icon-preset,
+.education-page .icon-preset-add,
+.education-page .icon-preset-manage {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.education-page .icon-preset img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.education-page .icon-preset[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: rgba(73, 105, 245, 0.12);
+    box-shadow: 0 0 0 2px rgba(73, 105, 245, 0.14);
+}
+
+.education-page .icon-preset:hover,
+.education-page .icon-preset-add:hover,
+.education-page .icon-preset-manage:hover {
+    transform: translateY(-1px);
+    border-color: var(--primary);
+}
+
+.education-page .icon-preset:focus-visible,
+.education-page .icon-preset-add:focus-visible,
+.education-page .icon-preset-manage:focus-visible,
+.education-page .icon-preset-edit:focus-visible,
+.education-page .icon-preset-delete:focus-visible {
+    outline: 3px solid rgba(73, 105, 245, 0.25);
+    outline-offset: 2px;
+}
+
+.education-page .icon-preset-add,
+.education-page .icon-preset-manage {
+    color: var(--primary-dark);
+    font: inherit;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.education-page .icon-preset-manage[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: rgba(73, 105, 245, 0.12);
+}
+
+.education-page .icon-preset-actions {
+    position: absolute;
+    z-index: 1;
+    top: -7px;
+    right: -7px;
+    display: none;
+    gap: 2px;
+}
+
+.education-page .icon-presets.is-editing .icon-preset-actions {
+    display: flex;
+}
+
+.education-page .icon-preset-edit,
+.education-page .icon-preset-delete {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: white;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.education-page .icon-preset-delete {
+    color: #b42318;
+}
+
+.education-page .game-tools {
+    margin-bottom: 14px;
+}
+
+.education-page .game-search {
+    display: block;
+    max-width: 440px;
+}
+
+.education-page .game-search input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+    color: var(--text);
+    font: inherit;
+}
+
+.education-page .game-search input:focus-visible {
+    outline: 3px solid rgba(73, 105, 245, 0.25);
+    outline-offset: 2px;
+}
+
+.education-page .game-empty-state {
+    margin: 12px 0;
+    color: var(--muted);
+}
+
+.education-page .game-empty-state[hidden],
+.education-page .game-button[hidden] {
+    display: none;
+}
+
+.education-page .game-section {
+    margin-top: 24px;
+}
+
+.education-page .game-section h2 {
+    margin: 0 0 12px;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.education-page .game-context-menu {
+    position: fixed;
+    z-index: 10;
+    min-width: 140px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+}
+
+.education-page .game-context-menu[hidden] {
+    display: none;
+}
+
+.education-page .game-context-menu button {
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.education-page .game-context-menu button:hover,
+.education-page .game-context-menu button:focus-visible {
+    background: rgba(73, 105, 245, 0.1);
+    outline: none;
+}
+
+.education-page .icon-editor {
+    width: min(440px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+
+.education-page .icon-editor::backdrop {
+    background: rgba(17, 24, 39, 0.42);
+}
+
+.education-page .icon-editor form {
+    display: grid;
+    gap: 12px;
+    padding: 22px;
+}
+
+.education-page .icon-editor h2 {
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.education-page .icon-editor label {
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.education-page .icon-editor input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    color: var(--text);
+    font: inherit;
+}
+
+.education-page .icon-editor input:focus-visible {
+    outline: 3px solid rgba(73, 105, 245, 0.25);
+    outline-offset: 2px;
+}
+
+.education-page .icon-editor-error {
+    margin: 0;
+    color: #b42318;
+    font-size: 0.88rem;
+}
+
+.education-page .icon-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.education-page .icon-editor-actions button {
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.education-page .icon-editor-actions .icon-editor-save {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+}
+
+.education-page .icon-editor-actions button:focus-visible {
     outline: 3px solid rgba(73, 105, 245, 0.25);
     outline-offset: 2px;
 }
