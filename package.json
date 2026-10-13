@@ -1,0 +1,14 @@
+{
+  "name": "betterhome-portal",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "dev": "npm run build && npx netlify-cli dev",
+    "deploy": "npx netlify-cli deploy --build",
+    "deploy:prod": "npx netlify-cli deploy --build --prod"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -14,10 +14,24 @@
                 <span>Student Dashboard</span>
             </div>
             <div class="topbar-links">
+                <button class="feedback-link admin-login-button" id="admin-login" type="button">Admin login</button>
                 <a class="feedback-link" href="https://forms.gle/mJQoS6bSczFWjd6n8" target="_blank" rel="noreferrer">New Games &amp; Feedback</a>
                 <a class="feedback-link utopia-link" href="https://vivaan.chickenkiller.com/" target="_blank" rel="noopener noreferrer"><img src="https://avatars.githubusercontent.com/u/126352888?s=200&amp;v=4" alt="" aria-hidden="true">Utopia</a>
             </div>
         </header>
+
+        <dialog class="icon-editor" id="admin-login-dialog" aria-labelledby="admin-login-title">
+            <form id="admin-login-form" novalidate>
+                <h2 id="admin-login-title">Admin login</h2>
+                <label for="admin-password">Password</label>
+                <input id="admin-password" type="password" autocomplete="current-password" required>
+                <p class="icon-editor-error" id="admin-login-error" role="alert" hidden></p>
+                <div class="icon-editor-actions">
+                    <button class="icon-editor-cancel" id="admin-login-cancel" type="button">Cancel</button>
+                    <button class="icon-editor-save" id="admin-login-submit" type="submit">Log in</button>
+                </div>
+            </form>
+        </dialog>
 
         <section class="hero">
             <p class="eyebrow">Classroom portal</p>

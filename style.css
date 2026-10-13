@@ -276,6 +276,22 @@ body.education-page {
     transition: all 0.2s ease;
 }
 
+.education-page .admin-login-button {
+    font: inherit;
+    cursor: pointer;
+}
+
+.education-page .admin-login-button:focus-visible {
+    outline: 3px solid rgba(73, 105, 245, 0.25);
+    outline-offset: 2px;
+}
+
+.education-page .admin-login-button.is-authenticated {
+    border-color: rgba(16, 122, 87, 0.28);
+    background: rgba(16, 122, 87, 0.08);
+    color: #126447;
+}
+
 .education-page .utopia-link {
     display: inline-flex;
     align-items: center;

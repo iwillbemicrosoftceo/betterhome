@@ -57,16 +57,33 @@ function initializeJoinPortal() {
         openJoinLink(koot, (value) => `https://kahoot.it/?pin=${encodeURIComponent(value)}`, "Kahoot", (value) => value.length === 7 && !hasLetters(value));
     });
 
-    nearjoin.addEventListener("click", () => {
-        if (near.value.trim().toLowerCase() === "krishna67") {
-            near.value = "";
-            const portalWindow = window.open("about:blank", "_blank");
+    nearjoin.addEventListener("click", async () => {
+        const password = near.value.trim();
+        if (password.length > 0 && !hasLetters(password) && password.length === 5) {
+            openJoinLink(near, (value) => `https://app.nearpod.com/?pin=${encodeURIComponent(value)}`, "Nearpod", (value) => value.length === 5 && !hasLetters(value));
+            return;
+        }
 
-            if (!portalWindow) {
-                alert("Popup blocked. Allow popups for this page and try again.");
+        const portalWindow = window.open("about:blank", "_blank");
+        if (!portalWindow) {
+            alert("Popup blocked. Allow popups for this page and try again.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/auth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password })
+            });
+            if (!response.ok) {
+                portalWindow.close();
+                alert(response.status === 429 ? "Too many attempts. Try again later." : "The portal password is incorrect.");
+                near.focus();
                 return;
             }
 
+            near.value = "";
             portalWindow.document.title = "Student Dashboard";
             const portalFrame = portalWindow.document.createElement("iframe");
             portalFrame.src = new URL("education.html", window.location.href).href;
@@ -75,14 +92,84 @@ function initializeJoinPortal() {
             portalWindow.document.documentElement.style.height = "100%";
             portalWindow.document.body.style.cssText = "margin:0;height:100vh;overflow:hidden";
             portalWindow.document.body.appendChild(portalFrame);
-            return;
+        } catch {
+            portalWindow.close();
+            alert("Unable to reach the portal server. Try again.");
         }
 
-        openJoinLink(near, (value) => `https://app.nearpod.com/?pin=${encodeURIComponent(value)}`, "Nearpod", (value) => value.length === 5 && !hasLetters(value));
+        return;
     });
 
     blookjoin.addEventListener("click", () => {
         openJoinLink(blook, (value) => `https://play.blooket.com/play?id=${encodeURIComponent(value)}`, "Blooket", (value) => value.length === 7 && !hasLetters(value));
+    });
+}
+
+function initializeAdminLogin() {
+    const loginButton = document.getElementById("admin-login");
+    if (!loginButton) {
+        return;
+    }
+
+    const dialog = document.getElementById("admin-login-dialog");
+    const form = document.getElementById("admin-login-form");
+    const passwordInput = document.getElementById("admin-password");
+    const errorMessage = document.getElementById("admin-login-error");
+    const cancelButton = document.getElementById("admin-login-cancel");
+    const submitButton = document.getElementById("admin-login-submit");
+
+    loginButton.addEventListener("click", () => {
+        errorMessage.hidden = true;
+        dialog.showModal();
+        passwordInput.focus();
+    });
+
+    dialog.addEventListener("close", () => {
+        form.reset();
+        errorMessage.hidden = true;
+    });
+
+    cancelButton.addEventListener("click", () => dialog.close());
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const password = passwordInput.value;
+        if (!password) {
+            errorMessage.textContent = "Enter the admin password.";
+            errorMessage.hidden = false;
+            passwordInput.focus();
+            return;
+        }
+
+        submitButton.disabled = true;
+        errorMessage.hidden = true;
+        try {
+            const response = await fetch("/api/admin-auth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password })
+            });
+            if (!response.ok) {
+                errorMessage.textContent = response.status === 429
+                    ? "Too many attempts. Try again later."
+                    : response.status === 401
+                        ? "The admin password is incorrect."
+                        : "Admin login is unavailable. Try again later.";
+                errorMessage.hidden = false;
+                passwordInput.select();
+                return;
+            }
+
+            dialog.close();
+            form.reset();
+            loginButton.textContent = "Admin signed in";
+            loginButton.classList.add("is-authenticated");
+        } catch {
+            errorMessage.textContent = "Unable to reach the server. Try again.";
+            errorMessage.hidden = false;
+        } finally {
+            submitButton.disabled = false;
+        }
     });
 }
 
@@ -482,4 +569,5 @@ function initializeEducationPortal() {
 }
 
 initializeJoinPortal();
+initializeAdminLogin();
 initializeEducationPortal();
