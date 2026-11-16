@@ -25,15 +25,24 @@
     </style>
     <!-- Ruffle CDN Script -->
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <script>
+        const container = document.getElementById('ruffle-container');
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        if (urlParams.has('name')) {
+         const userName = urlParams.get('name');
+         container.innerHTML = `
+        <object width="100%" height="100%" data="${swfFile}">
+        <param name="movie" value="${swfFile}">
+        <param name="allowFullScreen" value="true">
+        </object>`;
+        }
+    </script>
 </head>
 <body>
 
     <div id="ruffle-container">
-        <!-- Standard embed or object tag pointing to your SWF file -->
-        <object width="100%" height="100%" data="flash/happywheels.swf">
-            <param name="movie" value="your-game.swf">
-            <param name="allowFullScreen" value="true">
-        </object>
+       Javascript is disabled.
     </div>
 
 </body>
