@@ -16,8 +16,11 @@
             overflow: hidden;
             background-color: #000;
         }
-        /* Make the Ruffle/object/embed container fill the screen */
-        #ruffle-container, #ruffle-container object, #ruffle-container embed {
+        /* Include ruffle-object so Ruffle fills 100% of the screen */
+        #ruffle-container, 
+        #ruffle-container object, 
+        #ruffle-container embed, 
+        #ruffle-container ruffle-object {
             width: 100%;
             height: 100%;
             display: block;
@@ -25,25 +28,27 @@
     </style>
     <!-- Ruffle CDN Script -->
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-    <script>
-        const container = document.getElementById('ruffle-container');
-        const queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        if (urlParams.has('name')) {
-         const userName = urlParams.get('name');
-         container.innerHTML = `
-        <object width="100%" height="100%" data="${swfFile}">
-        <param name="movie" value="${swfFile}">
-        <param name="allowFullScreen" value="true">
-        </object>`;
-        }
-    </script>
 </head>
 <body>
 
     <div id="ruffle-container">
        Javascript is disabled.
     </div>
+
+    <script>
+        const container = document.getElementById('ruffle-container');
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Use ?game=yourfile.swf, or fall back to happywheels.swf if no parameter is given
+        const swfFile = urlParams.get('game');
+
+        container.innerHTML = `
+            <object width="100%" height="100%" data="${swfFile}">
+                <param name="movie" value="${swfFile}">
+                <param name="allowFullScreen" value="true">
+            </object>
+        `;
+    </script>
 
 </body>
 </html>
