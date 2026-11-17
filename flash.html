@@ -25,7 +25,9 @@
             height: min(100vh, 75vw);
             position: relative;
         }
-        #ruffle-container ruffle-player {
+        #ruffle-container object, 
+        #ruffle-container embed, 
+        #ruffle-container ruffle-object {
             width: 100% !important;
             height: 100% !important;
             display: block;
@@ -34,8 +36,7 @@
     <script>
         window.RufflePlayer = window.RufflePlayer || {};
         window.RufflePlayer.config = {
-            letterbox: "on",
-            allowFullscreen: true
+            letterbox: "on"
         };
     </script>
     <script src="https://unpkg.com"></script>
@@ -46,18 +47,21 @@
 
     <script>
         window.addEventListener("load", () => {
-            const ruffle = window.RufflePlayer.newest();
-            const player = ruffle.createPlayer();
             const container = document.getElementById("ruffle-container");
-            
-            container.appendChild(player);
-
             const urlParams = new URLSearchParams(window.location.search);
-            const swfFile = urlParams.get("game") || "happywheels.swf";
+            const swfFile = urlParams.get("game");
 
-            player.load({
-                url: swfFile
-            });
+            if (!swfFile) {
+                container.innerHTML = '<p style="color:white; text-align:center; padding-top:20%;">No ?game= URL provided.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <object data="${swfFile}">
+                    <param name="movie" value="${swfFile}">
+                    <param name="allowFullScreen" value="true">
+                </object>
+            `;
         });
     </script>
 
