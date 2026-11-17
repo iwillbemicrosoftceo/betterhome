@@ -40,7 +40,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         
         // Use ?game=yourfile.swf, or fall back to happywheels.swf if no parameter is given
-        const swfFile = urlParams.get('game');
+        const swfFile = urlParams.get('game') || 'flash/happywheels.swf';
 
         container.innerHTML = `
             <object width="100%" height="100%" data="${swfFile}">
