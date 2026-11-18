@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flash Embed</title>
+    <title>Ruffle Player</title>
     <style>
         * {
             margin: 0;
@@ -23,37 +23,49 @@
             width: min(100vw, 133.333vh);
             height: min(100vh, 75vw);
         }
-        /* Include ruffle-object so Ruffle fills 100% of the 4:3 container */
-        #ruffle-container object, 
-        #ruffle-container embed, 
-        #ruffle-container ruffle-object {
+        #ruffle-container ruffle-player {
             width: 100%;
             height: 100%;
             display: block;
         }
     </style>
-    <!-- Ruffle CDN Script -->
-    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+
+    <!-- 1. Configure Ruffle BEFORE loading the script -->
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = {
+            "polyfills": false,             // Skip scanning for <object>/<embed> tags
+            "autoplay": "on",               // Start immediately without waiting
+            "splashScreen": false,          // Skip the orange Ruffle splash delay
+            "allowNetworking": "none",      // Stop Newgrounds API filter timeouts
+            "openUrlMode": "deny",          // Block external URL calls
+            "preferredRenderer": "webgl",   // Force Chromebook GPU acceleration
+            "quality": "low"                // Speeds up heavy vector animations
+        };
+    </script>
+
+    <!-- 2. Point to your local ruffle.js (or keep unpkg if you don't have the .wasm files) -->
+    <script src="ruffle.js"></script>
 </head>
 <body>
 
-    <div id="ruffle-container">
-       Javascript is disabled.
-    </div>
+    <div id="ruffle-container"></div>
 
     <script>
-        const container = document.getElementById('ruffle-container');
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        // Use ?game=yourfile.swf, or fall back to happywheels.swf if no parameter is given
-        const swfFile = urlParams.get('game');
+        window.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("ruffle-container");
+            const urlParams = new URLSearchParams(window.location.search);
+            const swfFile = urlParams.get("game");
 
-        container.innerHTML = `
-            <object width="100%" height="100%" data="${swfFile}">
-                <param name="movie" value="${swfFile}">
-                <param name="allowFullScreen" value="true">
-            </object>
-        `;
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            container.appendChild(player);
+
+            player.load({
+                url: swfFile,
+                allowScriptAccess: false
+            });
+        });
     </script>
 
 </body>
